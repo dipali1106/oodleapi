@@ -1,0 +1,13 @@
+ul.page-numbers {
+    list-style:none;
+
+}
+ul.page-numbers li{
+    display:inline-block;
+    padding:5px;
+    height:30px;
+    width:40px;
+}
+ul.page-numbers li a{
+    text-decoration:none;
+}

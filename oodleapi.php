@@ -11,21 +11,19 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;// Exit if accessed directly 
 }
 
-
 add_shortcode('external_data','callback_function_one');
 function callback_function_one($atts){
+  wp_enqueue_style('custom-style',plugin_dir_url( __FILE__ ) .'/style.css');
+
     $post_per_page = 10;
-$page = isset( $_GET['cpage'] ) ? abs( (int) $_GET['cpage'] ) : 1;
-$offset = ( $page * $post_per_page ) - $post_per_page;
+    $page = isset( $_GET['cpage'] ) ? abs( (int) $_GET['cpage'] ) : 1;
+    $offset = ( $page * $post_per_page ) - $post_per_page;
     $defaults=[
-        'title'=>'data',
-        'post_per_page' => 10];
-    $atts=shortcode_atts($defaults,
-        $atts,
-        'external_data');
+        'title'=>'data',];
+    $atts=shortcode_atts($defaults,$atts,'external_data');
 
 
-    $url='https://jsonplaceholder.typicode.com/comments';  //?filter[posts_per_page]=100
+    $url='https://jsonplaceholder.typicode.com/comments';  
     $arguments=array(
         'method'=> 'GET',
     );
@@ -38,10 +36,12 @@ $offset = ( $page * $post_per_page ) - $post_per_page;
 
     $results=json_decode(wp_remote_retrieve_body($response));
     //var_dump($results);
+    //$results2=$results[''];
     $total=count($results);
+    $final = array_splice($results, $offset, $post_per_page);
+    //var_dump($final);
 
-
-    $html='<table>';
+    $html='<table class="data-table">';
     $html .='<tr>';
     $html .='<td width="100" >user_id</td>';
     $html .='<td width="100" >id</td>';
@@ -49,6 +49,15 @@ $offset = ( $page * $post_per_page ) - $post_per_page;
     $html .='<td width="200" >email</td>';
     $html .='<td width="400" >body</td>';
     $html .='</tr>';
+
+    foreach($final as $key => $value): 
+        $html .='<tr>';        
+        foreach($value as $index => $element): ?>
+           <?php $html .='<td width="100" >'.$element.'</td>'; ?>
+        <?php endforeach; 
+        $html .='</tr>';
+     endforeach; 
+    /*
     foreach($results as $result){
          $html .='<tr>';
     $html .='<td width="100" >'. $result->postId.'</td>';
@@ -60,8 +69,10 @@ $offset = ( $page * $post_per_page ) - $post_per_page;
     $html .='</tr>';
 
     }
-/*   
-echo '<div class="pagination">';
+  */
+
+    $html.='</table>';
+    echo '<div class="pagination">';
 echo paginate_links( array(
 'base' => add_query_arg( 'cpage', '%#%' ),
 'format' => '',
@@ -71,12 +82,10 @@ echo paginate_links( array(
 'current' => $page,
 'type' => 'list'
 ));
-echo '</div>';*/
-
-    $html.='</table>';
-
+echo '</div>'; 
 
     return $html;
+
 
 
     
